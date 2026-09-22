@@ -35,5 +35,41 @@ const Storage = {
         } catch (e) {
             // 忽略存储错误
         }
+    },
+
+    /**
+     * 读取 JSON 数据
+     */
+    getJSON(key, defaultValue = null) {
+        try {
+            const raw = localStorage.getItem(key);
+            return raw === null ? defaultValue : JSON.parse(raw);
+        } catch (e) {
+            return defaultValue;
+        }
+    },
+
+    /**
+     * 写入 JSON 数据
+     */
+    setJSON(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (e) {
+            // 存储已满或被禁用时静默失败
+            return false;
+        }
+    },
+
+    /**
+     * 删除指定键
+     */
+    remove(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {
+            // 忽略存储错误
+        }
     }
 };

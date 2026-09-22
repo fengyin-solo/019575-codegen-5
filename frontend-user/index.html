@@ -275,6 +275,37 @@
                     <div class="canvas-drop-hint hidden" id="canvas-drop-hint">
                         <span>拖放透镜到这里</span>
                     </div>
+                    <div class="playback-badge hidden" id="playback-badge">⏯ 回放中（画布只读）</div>
+                </div>
+                <!-- 录制/回放控制条（无录制内容时隐藏） -->
+                <div class="recorder-bar hidden" id="recorder-bar">
+                    <div class="recorder-actions">
+                        <button class="btn btn-tool" id="btn-record" title="录制本次实验过程">
+                            <span class="record-dot" id="record-dot" style="display:none;"></span>
+                            <span id="record-label">开始录制</span>
+                        </button>
+                        <button class="btn btn-tool" id="btn-playback" title="按时间轴回放录制">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polygon points="10 8 16 12 10 16 10 8"/>
+                            </svg>
+                            <span>回放</span>
+                        </button>
+                        <span class="record-time" id="record-time"></span>
+                    </div>
+                    <div class="playback-controls" id="playback-controls" style="display:none;">
+                        <button class="btn btn-secondary btn-sm" id="btn-play-start" title="回到开头">⏮</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-play-prev" title="上一个操作">◀</button>
+                        <button class="btn btn-primary btn-sm" id="btn-play-pause">▶ 播放</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-play-next" title="下一个操作">▶</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-play-end" title="跳到结尾">⏭</button>
+                        <input type="range" class="timeline-slider" id="playback-timeline"
+                               min="0" max="1" step="50" value="0" title="拖动跳到任意时间点">
+                        <span class="playback-time">
+                            <span id="playback-time-current">00:00</span> / <span id="playback-time-total">00:00</span>
+                        </span>
+                        <button class="btn btn-secondary btn-sm" id="btn-exit-playback" title="退出回放并保持画布当前状态">退出回放</button>
+                    </div>
                 </div>
             </section>
 
@@ -363,6 +394,7 @@
     <script src="js/canvas.js"></script>
     <script src="js/quiz.js"></script>
     <script src="js/interaction.js"></script>
+    <script src="js/recorder.js"></script>
     <script src="js/guide.js"></script>
     <script src="js/app.js"></script>
 </body>

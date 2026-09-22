@@ -7,7 +7,8 @@ class App {
         this.interactionManager = null;
         this.guideManager = null;
         this.quizManager = null;
-        
+        this.recorderManager = null;
+
         this.init();
     }
     
@@ -39,7 +40,10 @@ class App {
         
         // 初始化测验管理器
         this.quizManager = new QuizManager(this.canvasManager);
-        
+
+        // 初始化实验录制与回放管理器（恢复已保存的录制/回放状态）
+        this.recorderManager = new RecorderManager(this.canvasManager);
+
         // 初始化知识点提示
         this.initKnowledgeTips();
         
@@ -141,6 +145,11 @@ class App {
      * 开始测验模式
      */
     startQuizMode() {
+        // 回放中画布只读，不允许进入测验
+        if (this.canvasManager.playbackLocked) {
+            Utils.showToast('请先退出回放再开始测验', 'warning');
+            return;
+        }
         // 清空画布
         this.canvasManager.clear();
         

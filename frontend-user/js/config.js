@@ -9,7 +9,9 @@ const CONFIG = {
     STORAGE_KEYS: {
         DESIGNS: 'optics_designs',
         SETTINGS: 'optics_settings',
-        GUIDE_COMPLETED: 'optics_guide_completed'
+        GUIDE_COMPLETED: 'optics_guide_completed',
+        RECORDING: 'optics_experiment_recording',
+        PLAYBACK: 'optics_experiment_playback'
     },
     
     // 透镜类型

@@ -1081,3 +1081,119 @@
         width: 100%;
     }
 }
+
+/* ======================== 实验录制与回放 ======================== */
+
+.toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background-color: var(--color-border);
+    margin: 0 var(--spacing-xs);
+}
+
+/* 录制红点 */
+.record-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #E74C3C;
+    display: inline-block;
+    animation: record-blink 1.2s ease-in-out infinite;
+}
+
+.record-dot.paused {
+    animation: none;
+    opacity: 0.5;
+}
+
+@keyframes record-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+#btn-record.active {
+    background-color: rgba(231, 76, 60, 0.12);
+    border-color: #E74C3C;
+    color: #E74C3C;
+}
+
+/* 录制/回放控制条 */
+.recorder-bar {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-bg-input);
+    border-top: 1px solid var(--color-border);
+    gap: var(--spacing-sm);
+}
+
+.recorder-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex-shrink: 0;
+}
+
+.record-time {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    min-width: 92px;
+}
+
+.recorder-bar.recording .record-time {
+    color: #E74C3C;
+    font-weight: 600;
+}
+
+.playback-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+.timeline-slider {
+    flex: 1;
+    min-width: 120px;
+    height: 4px;
+    cursor: pointer;
+}
+
+.playback-time {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* 画布上的"回放中"角标 */
+.playback-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 10px;
+    background-color: rgba(52, 152, 219, 0.92);
+    color: #fff;
+    font-size: var(--font-size-xs);
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 回放模式下，画布以外的编辑控件置灰，提示只读 */
+body.playback-mode .sidebar,
+body.playback-mode #btn-toggle-light,
+body.playback-mode #btn-reset-canvas,
+body.playback-mode #btn-toggle-labels,
+body.playback-mode #select-light-mode {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+body.playback-mode #btn-record {
+    pointer-events: none;
+    opacity: 0.55;
+}

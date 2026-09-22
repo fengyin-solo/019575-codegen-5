@@ -329,3 +329,34 @@
         box-shadow: none;
     }
 }
+
+/* 录制/回放控制条移动端适配 */
+@media (max-width: 768px) {
+    .recorder-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-xs);
+    }
+
+    .recorder-actions {
+        justify-content: space-between;
+    }
+
+    .playback-controls {
+        justify-content: center;
+    }
+
+    .timeline-slider {
+        flex-basis: 100%;
+        order: 10;
+    }
+
+    .playback-time {
+        flex-basis: 100%;
+        text-align: center;
+    }
+
+    .playback-badge {
+        font-size: 11px;
+    }
+}
