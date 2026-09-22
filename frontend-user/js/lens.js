@@ -133,14 +133,22 @@ class Lens {
             refractiveIndex: this.refractiveIndex,
             size: this.size,
             curvature: this.curvature,
-            material: this.material
+            material: this.material,
+            dispersion: this.dispersion
         };
     }
-    
+
     /**
-     * 从JSON创建透镜
+     * 从JSON创建透镜（按录制内容还原折射率与色散，而非材料默认值）
      */
     static fromJSON(json) {
-        return new Lens(json);
+        const lens = new Lens(json);
+        if (typeof json.refractiveIndex === 'number') {
+            lens.refractiveIndex = json.refractiveIndex;
+        }
+        if (typeof json.dispersion === 'number') {
+            lens.dispersion = json.dispersion;
+        }
+        return lens;
     }
 }

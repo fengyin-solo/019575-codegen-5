@@ -166,6 +166,7 @@
                 <h1 class="app-title">光学设计实验室</h1>
             </div>
             <div class="header-right">
+                <span class="playback-badge hidden" id="playback-badge" title="当前正在回放实验">▶ 回放中</span>
                 <button class="btn btn-tool" id="btn-quiz-mode" title="光学测验模式">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -276,6 +277,38 @@
                         <span>拖放透镜到这里</span>
                     </div>
                 </div>
+                <!-- 实验录制与回放条 -->
+                <div class="recorder-bar" id="recorder-bar">
+                    <button class="btn btn-tool btn-rec-record" id="btn-rec-record" title="开始/停止录制">
+                        <span class="rec-dot"></span>
+                        <span id="rec-record-label">录制</span>
+                    </button>
+                    <span class="rec-live-badge hidden" id="rec-live-badge">
+                        <span class="rec-live-dot"></span>
+                        <span>REC</span>
+                        <span class="rec-live-elapsed" id="rec-live-elapsed">00:00</span>
+                    </span>
+                    <button class="btn btn-tool" id="btn-rec-play" title="播放/暂停回放" disabled>
+                        <svg class="icon" id="rec-play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-tool" id="btn-rec-stop" title="退出回放" disabled>
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="5" y="5" width="14" height="14"/>
+                        </svg>
+                    </button>
+                    <span class="rec-time" id="rec-time-current">00:00</span>
+                    <input type="range" class="rec-timeline" id="rec-timeline"
+                           min="0" max="0" step="100" value="0" disabled>
+                    <span class="rec-time rec-time-total" id="rec-time-total">00:00</span>
+                    <button class="btn btn-tool btn-rec-delete hidden" id="btn-rec-delete" title="删除录制">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
             </section>
 
             <!-- 右侧参数面板 -->
@@ -363,6 +396,7 @@
     <script src="js/canvas.js"></script>
     <script src="js/quiz.js"></script>
     <script src="js/interaction.js"></script>
+    <script src="js/recorder.js"></script>
     <script src="js/guide.js"></script>
     <script src="js/app.js"></script>
 </body>

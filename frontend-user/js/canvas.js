@@ -10,7 +10,9 @@ class CanvasManager {
         this.selectedLens = null;
         this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
-        
+        this.dragMoved = false;
+        this.recorder = null;
+
         this.init();
     }
     
@@ -92,12 +94,16 @@ class CanvasManager {
     }
     
     handlePointerDown(e) {
+        // 回放中锁定画布，不响应任何编辑
+        if (this.recorder && this.recorder.isPlaybackActive) return;
+
         const pos = this.getPointerPos(e);
         const lens = this.renderer.getLensAtPoint(pos.x, pos.y);
-        
+
         if (lens) {
             this.selectLens(lens);
             this.isDragging = true;
+            this.dragMoved = false;
             this.dragOffset = {
                 x: pos.x - lens.x,
                 y: pos.y - lens.y
@@ -109,25 +115,42 @@ class CanvasManager {
     
     handlePointerMove(e) {
         if (!this.isDragging || !this.selectedLens) return;
-        
+
         const pos = this.getPointerPos(e);
-        
-        this.selectedLens.x = Utils.clamp(
+
+        const newX = Utils.clamp(
             pos.x - this.dragOffset.x,
             50,
             this.renderer.width - 50
         );
-        this.selectedLens.y = Utils.clamp(
+        const newY = Utils.clamp(
             pos.y - this.dragOffset.y,
             50,
             this.renderer.height - 50
         );
-        
+
+        if (Math.abs(newX - this.selectedLens.x) > 1 ||
+            Math.abs(newY - this.selectedLens.y) > 1) {
+            this.dragMoved = true;
+        }
+
+        this.selectedLens.x = newX;
+        this.selectedLens.y = newY;
+
         this.renderer.render();
     }
-    
+
     handlePointerUp() {
+        // 一次拖动只记录最终落点（连续位移按同参数合并）
+        if (this.isDragging && this.dragMoved && this.recorder && this.selectedLens) {
+            this.recorder.recordLensMove(
+                this.selectedLens.id,
+                this.selectedLens.x,
+                this.selectedLens.y
+            );
+        }
         this.isDragging = false;
+        this.dragMoved = false;
     }
     
     handleDragOver(e) {
@@ -143,31 +166,37 @@ class CanvasManager {
     handleDrop(e) {
         e.preventDefault();
         document.getElementById('canvas-drop-hint').classList.add('hidden');
-        
+
+        // 回放中禁止编辑
+        if (this.recorder && this.recorder.isPlaybackActive) return;
+
         const lensType = e.dataTransfer.getData('lens-type');
         const material = e.dataTransfer.getData('lens-material');
-        
+
         if (!lensType) return;
-        
+
         const pos = this.getPointerPos(e);
-        
+
         const lens = new Lens({
             type: lensType,
             x: pos.x,
             y: pos.y,
             material: material || 'normal'
         });
-        
+
         this.addLens(lens);
         this.selectLens(lens);
         Utils.showToast('透镜已添加', 'success');
     }
-    
+
     addLens(lens) {
         this.lenses.push(lens);
         this.renderer.setLenses(this.lenses);
+        if (this.recorder) {
+            this.recorder.recordLensAdd(lens);
+        }
     }
-    
+
     removeLens(lens) {
         const index = this.lenses.indexOf(lens);
         if (index > -1) {
@@ -176,6 +205,9 @@ class CanvasManager {
                 this.deselectLens();
             }
             this.renderer.setLenses(this.lenses);
+            if (this.recorder) {
+                this.recorder.recordLensRemove(lens.id);
+            }
         }
     }
     
@@ -205,10 +237,47 @@ class CanvasManager {
         this.lenses = [];
         this.selectedLens = null;
         this.isDragging = false;
+        this.dragMoved = false;
         this.renderer.setLenses([]);
         this.renderer.render();
+        if (this.recorder) {
+            this.recorder.recordCanvasReset();
+        }
     }
-    
+
+    /**
+     * 序列化当前画布状态（录制快照/回放恢复）
+     */
+    getStateSnapshot() {
+        return {
+            lenses: this.lenses.map(lens => lens.toJSON()),
+            running: this.renderer.isRunning,
+            lightMode: this.renderer.lightMode
+        };
+    }
+
+    /**
+     * 用快照恢复画布状态（回放跳转/结束/退出时调用）
+     */
+    restoreState(state, options = {}) {
+        this.lenses = (state.lenses || []).map(data => Lens.fromJSON(data));
+        this.selectedLens = null;
+        this.isDragging = false;
+        this.dragMoved = false;
+
+        this.renderer.setLenses(this.lenses);
+        this.renderer.setLightMode(state.lightMode || CONFIG.LIGHT_DEFAULTS.mode);
+        this.renderer.setRunning(!!state.running);
+
+        // 选中当前时刻最后被操作的透镜，使右侧参数面板与画面同步
+        if (options.selectLensId) {
+            const lens = this.lenses.find(l => l.id === options.selectLensId);
+            if (lens) this.selectLens(lens);
+        }
+
+        this.renderer.render();
+    }
+
     getRenderer() {
         return this.renderer;
     }

@@ -7,7 +7,8 @@ class App {
         this.interactionManager = null;
         this.guideManager = null;
         this.quizManager = null;
-        
+        this.recorderManager = null;
+
         this.init();
     }
     
@@ -33,19 +34,22 @@ class App {
         
         // 初始化交互管理器
         this.interactionManager = new InteractionManager(this.canvasManager);
-        
+
+        // 初始化实验录制与回放（同时给画布和交互管理器接通埋点）
+        this.recorderManager = new RecorderManager(this.canvasManager, this.interactionManager);
+
         // 初始化引导系统
         this.guideManager = new GuideManager();
-        
+
         // 初始化测验管理器
         this.quizManager = new QuizManager(this.canvasManager);
-        
+
         // 初始化知识点提示
         this.initKnowledgeTips();
-        
+
         // 初始化测验模式事件
         this.initQuizMode();
-        
+
         console.log('应用初始化完成');
     }
     
@@ -130,6 +134,14 @@ class App {
      * 切换测验模式
      */
     toggleQuizMode() {
+        // 录制/回放期间不进入测验，避免与录制的画布操作互相干扰
+        if (!this.quizManager.isQuizMode &&
+            this.recorderManager &&
+            (this.recorderManager.isRecording || this.recorderManager.isPlaybackActive)) {
+            Utils.showToast('请先结束录制或退出回放，再进入测验模式', 'warning');
+            return;
+        }
+
         if (this.quizManager.isQuizMode) {
             this.stopQuizMode();
         } else {

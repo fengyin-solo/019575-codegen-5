@@ -1062,22 +1062,210 @@
     .quiz-panel {
         max-height: 50vh;
     }
-    
+
     .app-container.quiz-mode .app-main {
         padding-top: 50vh;
     }
-    
+
     .quiz-title-section {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-xs);
     }
-    
+
     .quiz-panel-footer {
         flex-direction: column;
     }
-    
+
     .quiz-panel-footer .btn {
         width: 100%;
+    }
+}
+
+/* ===== 实验录制与回放 ===== */
+
+/* 回放状态徽标（顶栏，初始化即可见） */
+.playback-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-primary);
+    color: var(--color-text-inverse);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    animation: playbackPulse 1.6s ease-in-out infinite;
+}
+
+.playback-badge.is-paused {
+    background-color: var(--color-warning);
+    animation: none;
+}
+
+.playback-badge.is-finished {
+    background-color: var(--color-success);
+    animation: none;
+}
+
+@keyframes playbackPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+}
+
+/* 录制/回放条 */
+.recorder-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    margin: 0 var(--spacing-md) var(--spacing-md);
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+/* 录制按钮 */
+.btn-rec-record {
+    color: var(--color-error);
+}
+
+.btn-rec-record .rec-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-error);
+    flex-shrink: 0;
+}
+
+.btn-rec-record.active {
+    background-color: var(--color-error);
+    border-color: var(--color-error);
+    color: var(--color-text-inverse);
+}
+
+.btn-rec-record.active .rec-dot {
+    background-color: var(--color-text-inverse);
+}
+
+/* 录制中指示 */
+.rec-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-error);
+}
+
+.rec-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-error);
+    animation: playbackPulse 1s ease-in-out infinite;
+}
+
+.rec-live-elapsed {
+    font-family: "Courier New", monospace;
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
+}
+
+/* 时间轴 */
+.rec-timeline {
+    flex: 1;
+    min-width: 60px;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+    outline: none;
+    cursor: pointer;
+}
+
+.rec-timeline:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.rec-timeline::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+}
+
+.rec-timeline:disabled::-webkit-slider-thumb {
+    cursor: not-allowed;
+}
+
+.rec-timeline::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    border: none;
+}
+
+.rec-time {
+    font-family: "Courier New", monospace;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.rec-time-total {
+    color: var(--color-text-hint);
+}
+
+.btn-rec-delete {
+    color: var(--color-error);
+}
+
+.btn-rec-delete:hover {
+    border-color: var(--color-error);
+}
+
+/* 回放中：除录制条外的编辑入口全部锁定 */
+.app-container.playback-mode .sidebar-left,
+.app-container.playback-mode .sidebar-right,
+.app-container.playback-mode .canvas-toolbar,
+.app-container.playback-mode .canvas-wrapper {
+    pointer-events: none;
+}
+
+.app-container.playback-mode .canvas-wrapper {
+    opacity: 0.92;
+}
+
+/* 录制条自身始终可操作 */
+.recorder-bar {
+    pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+    .recorder-bar {
+        margin: 0 var(--spacing-sm) var(--spacing-sm);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        gap: var(--spacing-xs);
+        flex-wrap: wrap;
+    }
+
+    .rec-timeline {
+        order: 10;
+        flex-basis: 100%;
+    }
+
+    .playback-badge {
+        padding: 3px 8px;
+        font-size: 10px;
     }
 }

@@ -6,7 +6,8 @@ class InteractionManager {
         this.canvasManager = canvasManager;
         this.renderer = canvasManager.getRenderer();
         this.btnToggleLight = null;
-        
+        this.recorder = null;
+
         this.init();
     }
     
@@ -37,6 +38,8 @@ class InteractionManager {
             // 触摸设备点击添加
             if (Utils.isTouchDevice()) {
                 item.addEventListener('click', () => {
+                    // 回放中禁止编辑
+                    if (this.recorder && this.recorder.isPlaybackActive) return;
                     const lens = new Lens({
                         type: item.dataset.lensType,
                         x: this.renderer.width / 2,
@@ -57,32 +60,42 @@ class InteractionManager {
         this.btnToggleLight.addEventListener('click', () => {
             const isRunning = this.renderer.toggleRunning();
             this.updateLightButtonState(isRunning);
+            if (this.recorder) {
+                this.recorder.recordLightToggle(isRunning);
+            }
         });
-        
+
         // 重置画布
         document.getElementById('btn-reset-canvas').addEventListener('click', () => {
+            // 回放中禁止编辑
+            if (this.recorder && this.recorder.isPlaybackActive) return;
+
             if (this.canvasManager.lenses.length === 0 && !this.renderer.isRunning) {
                 Utils.showToast('画布已经是空的了', 'info');
                 return;
             }
-            
-            // 重置透镜
+
+            // 重置透镜（clear 内部会记录 canvasReset）
             this.canvasManager.clear();
-            
+
             // 重置光线状态
             this.renderer.setRunning(false);
             this.updateLightButtonState(false);
-            
+            if (this.recorder && this.recorder.isRecording) {
+                this.recorder.recordLightToggle(false);
+            }
+
             Utils.showToast('画布已重置', 'success');
         });
-        
+
         // 光源模式选择
         document.getElementById('select-light-mode').addEventListener('change', (e) => {
             this.renderer.setLightMode(e.target.value);
-            document.getElementById('data-light-type').textContent = 
-                e.target.value === 'parallel' ? '平行光' : '点光源';
+            if (this.recorder) {
+                this.recorder.recordLightMode(e.target.value);
+            }
         });
-        
+
         // 切换标注
         const btnToggleLabels = document.getElementById('btn-toggle-labels');
         btnToggleLabels.addEventListener('click', () => {
@@ -111,54 +124,75 @@ class InteractionManager {
         riSlider.addEventListener('input', (e) => {
             const value = parseFloat(e.target.value);
             document.getElementById('param-ri-value').textContent = value.toFixed(2);
-            
+
             if (this.canvasManager.selectedLens) {
                 this.canvasManager.selectedLens.refractiveIndex = value;
+                if (this.recorder) {
+                    this.recorder.recordLensParam(
+                        this.canvasManager.selectedLens.id, 'refractiveIndex', value
+                    );
+                }
                 this.renderer.render();
             }
         });
-        
+
         const sizeSlider = document.getElementById('param-size');
         sizeSlider.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
             document.getElementById('param-size-value').textContent = `${value}%`;
-            
+
             if (this.canvasManager.selectedLens) {
                 this.canvasManager.selectedLens.size = value;
+                if (this.recorder) {
+                    this.recorder.recordLensParam(
+                        this.canvasManager.selectedLens.id, 'size', value
+                    );
+                }
                 this.renderer.render();
             }
         });
-        
+
         const curvatureSlider = document.getElementById('param-curvature');
         curvatureSlider.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
             document.getElementById('param-curvature-value').textContent = `${value}%`;
-            
+
             if (this.canvasManager.selectedLens) {
                 this.canvasManager.selectedLens.curvature = value;
+                if (this.recorder) {
+                    this.recorder.recordLensParam(
+                        this.canvasManager.selectedLens.id, 'curvature', value
+                    );
+                }
                 this.renderer.render();
             }
         });
-        
+
         document.getElementById('param-material').addEventListener('change', (e) => {
             if (this.canvasManager.selectedLens) {
                 this.canvasManager.selectedLens.applyMaterial(e.target.value);
                 riSlider.value = this.canvasManager.selectedLens.refractiveIndex;
-                document.getElementById('param-ri-value').textContent = 
+                document.getElementById('param-ri-value').textContent =
                     this.canvasManager.selectedLens.refractiveIndex.toFixed(2);
+                if (this.recorder) {
+                    this.recorder.recordLensMaterial(this.canvasManager.selectedLens);
+                }
                 this.renderer.render();
             }
         });
-        
+
         document.getElementById('btn-reset-lens').addEventListener('click', () => {
             if (this.canvasManager.selectedLens) {
                 this.canvasManager.selectedLens.reset();
                 this.updateParamPanel(this.canvasManager.selectedLens);
+                if (this.recorder) {
+                    this.recorder.recordLensReset(this.canvasManager.selectedLens);
+                }
                 this.renderer.render();
                 Utils.showToast('参数已重置', 'success');
             }
         });
-        
+
         document.getElementById('btn-delete-lens').addEventListener('click', () => {
             if (this.canvasManager.selectedLens) {
                 this.canvasManager.removeLens(this.canvasManager.selectedLens);
